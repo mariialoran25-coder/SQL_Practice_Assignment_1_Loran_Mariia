@@ -52,12 +52,12 @@ create table grades (
 
 
 
-
 WITH student_study AS (
     SELECT
         s.full_name AS student_name,
         t.full_name AS teacher_name,
         s.financed_at AS financedBy,
+        c.course_name As course ,
         SUM(e.class_hours) AS total_hours,
         AVG(g.score) AS avg_score
     FROM "Enrollments" e
@@ -66,16 +66,30 @@ WITH student_study AS (
     JOIN "Teacher" t ON c.teacher_id = t.id
     JOIN "Grades" g ON s.id = g.student_id AND c.id = g.course_id
     WHERE c.status = 'active'
-    GROUP BY s.full_name,t.full_name,s.financed_at, e.class_hours, g.score
-    ORDER BY avg_score
+    GROUP BY s.full_name,t.full_name,s.financed_at, c.course_name
+
 )
 SELECT
     student_name,
     teacher_name,
+    course,
     financedBy,
     total_hours,
     avg_score
 FROM student_study
+WHERE avg_score > 8.0 And total_hours > 80
+
+UNION ALL
+SELECT
+    student_name,
+    teacher_name,
+    course,
+    financedBy,
+    total_hours,
+    avg_score
+FROM  student_study
+WHERE avg_score <= 8.0 And total_hours > 80
+ORDER BY student_name, avg_score DESC;
 
 
 
